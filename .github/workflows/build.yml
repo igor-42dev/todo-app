@@ -23,6 +23,7 @@ jobs:
         with:
           dotnet-version: '8.x.x'
           cache: true
+          cache-dependency-path: ./backend/packages.lock.json
           
       - name: Build .NET Core project
         working-directory: ./backend
