@@ -79,9 +79,9 @@ jobs:
           path: backend/TestResults
 
   frontend-build-and-test:
-    if: false
+    needs: versionamento
     runs-on: ubuntu-latest
-    name: Build Project
+    name: Frontend Build and Test
 
     steps:
       - name: Checkout code
@@ -97,5 +97,9 @@ jobs:
       - name: Install dependencies
         working-directory: ./frontend
         run: |
-          npm install
+          npm ci
+          
+      - name: Build
+        working-directory: ./frontend
+        run: |
           npm run build
