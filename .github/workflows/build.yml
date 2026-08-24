@@ -7,9 +7,25 @@ on:
     branches:
       - main
 #  essa tag permite executar o fluxo manualmente
-#  workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
+  versionamento:
+    runs-on: ubuntu-latest
+    name: Versionamento
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref}}
+          fetch-depth: 0
+
+      - uses: codacy/git-version@2.8.0
+        with:
+          release-branch: main
+          prefix: v
+
   build:
     runs-on: ubuntu-latest
     name: Build Project
@@ -30,6 +46,18 @@ jobs:
         run: |
           dotnet restore TodoApp.Api.slnx
           dotnet build --no-restore TodoApp.Api.slnx
+
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          dotnet test TodoApp.Api.slnx --no-restore --no-build --logger trx --results-directory "TestResults"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dotnet-test-results
+          path: backend/TestResults
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
