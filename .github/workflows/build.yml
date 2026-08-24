@@ -6,6 +6,8 @@ on:
   pull_request:
     branches:
       - main
+#  essa tag permite executar o fluxo manualmente
+#  workflow_dispatch:
 
 jobs:
   build:
@@ -20,7 +22,8 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.x.x'
-
+          cache: true
+          
       - name: Build .NET Core project
         working-directory: ./backend
         run: |
@@ -31,6 +34,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '25'
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./frontend
