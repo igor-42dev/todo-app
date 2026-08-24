@@ -64,7 +64,7 @@ jobs:
       - name: Build .NET Core project
         working-directory: ./backend
         run: |
-          dotnet build --no-restore TodoApp.Api.slnx
+          dotnet build --no-restore --configuration Release TodoApp.Api.slnx
 
       - name: Tests
         working-directory: ./backend
