@@ -15,7 +15,7 @@ jobs:
     name: Versionamento
     permissions:
       contents: write
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -40,9 +40,10 @@ jobs:
           git push --tags
         if: github.ref == 'refs/heads/main'  
 
-  build:
+  backend-build-and-test:
+    needs: versionamento
     runs-on: ubuntu-latest
-    name: Build Project
+    name: Backend Build and Test
 
     steps:
       - name: Checkout code
@@ -54,17 +55,21 @@ jobs:
           dotnet-version: '8.x.x'
           cache: true
           cache-dependency-path: ./backend/packages.lock.json
-          
-      - name: Build .NET Core project
+
+      - name: Restore .NET Core
         working-directory: ./backend
         run: |
           dotnet restore TodoApp.Api.slnx
-          dotnet build --no-restore TodoApp.Api.slnx
-
-      - name: Run tests
+      
+      - name: Build .NET Core project
         working-directory: ./backend
         run: |
-          dotnet test TodoApp.Api.slnx --no-restore --no-build --logger trx --results-directory "TestResults"
+          dotnet build --no-restore --configuration Release TodoApp.Api.slnx
+
+      - name: Tests
+        working-directory: ./backend
+        run: |
+          dotnet test TodoApp.Api.slnx --no-restore --no-build  --configuration Release --logger trx --results-directory "TestResults"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -72,6 +77,15 @@ jobs:
         with:
           name: dotnet-test-results
           path: backend/TestResults
+
+  frontend-build-and-test:
+    if: false
+    runs-on: ubuntu-latest
+    name: Build Project
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
