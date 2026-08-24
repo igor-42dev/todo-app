@@ -1,0 +1,30 @@
+<div class="task-list-container">
+  <div class="task-list-header">
+    <h1>Tarefas</h1>
+    <button class="btn-new" (click)="onNew()">Nova Task</button>
+  </div>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <table *ngIf="tasks.length > 0" class="task-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let task of tasks">
+        <td>{{ task.id }}</td>
+        <td>{{ task.descricao }}</td>
+        <td class="actions">
+          <button class="btn-edit" (click)="onEdit(task)">Editar</button>
+          <button class="btn-delete" (click)="onDelete(task)">Deletar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="tasks.length === 0 && !errorMessage" class="empty-message">Nenhuma tarefa encontrada.</p>
+</div>

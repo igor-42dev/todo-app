@@ -1,0 +1,24 @@
+<div class="task-form-container">
+  <h1>{{ isEditing ? 'Editar Tarefa' : 'Nova Tarefa' }}</h1>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <form class="task-form" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="descricao">Descrição</label>
+      <input
+        type="text"
+        id="descricao"
+        placeholder="Descrição da tarefa"
+        [(ngModel)]="descricao"
+        name="descricao"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn-save">{{ isEditing ? 'Salvar' : 'Criar' }}</button>
+    </div>
+  </form>
+</div>

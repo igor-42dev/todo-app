@@ -1,0 +1,39 @@
+name: Build Project
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Project
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set .NET Core SDK version
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.x.x'
+
+      - name: Build .NET Core project
+        working-directory: ./backend
+        run: |
+          dotnet restore TodoApp.Api.slnx
+          dotnet build --no-restore TodoApp.Api.slnx
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build

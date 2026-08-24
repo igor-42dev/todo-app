@@ -1,0 +1,28 @@
+<div class="login-container">
+  <form class="login-form" (ngSubmit)="onLogin()">
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <h1>Login</h1>
+
+    <div class="form-group">
+      <input
+        type="email"
+        placeholder="Email"
+        [(ngModel)]="email"
+        name="email"
+        autocomplete="email"
+      />
+    </div>
+
+    <div class="form-group">
+      <input
+        type="password"
+        placeholder="Senha"
+        [(ngModel)]="senha"
+        name="senha"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <button type="submit">Login</button>
+  </form>
+</div>
