@@ -103,3 +103,13 @@ jobs:
         working-directory: ./frontend
         run: |
           npm run build
+          
+  dependency-check:
+    needs: versionamento
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v6
+
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@v5
