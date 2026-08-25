@@ -103,7 +103,7 @@ jobs:
         working-directory: ./frontend
         run: |
           npm run build
-          
+
   dependency-check:
     needs: versionamento
     runs-on: ubuntu-latest
@@ -113,3 +113,30 @@ jobs:
 
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v5
+
+  code-security-check:
+    needs: versionamento
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - csharp
+          - javascript-typescript
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        if: matrix.language == 'csharp'
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
