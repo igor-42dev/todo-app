@@ -37,10 +37,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "::notice:: ${{ steps.version.outputs.version }}"
-          git config --global user.email "${{ github.actor }}@users.noreplay.github.com"
+
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
           git config --global user.name "${{ github.actor }}"
-          git tag -a ${{ steps.version.outputs.version }} -m "Release ${{ steps.version.outputs.version }}"
-          git push --tags
+
+          git tag -a "${{ steps.version.outputs.version }}" \
+            -m "Release ${{ steps.version.outputs.version }}"
+
+          git push origin "${{ steps.version.outputs.version }}"
         if: github.ref == 'refs/heads/main'  
 
   backend-build-and-test:
@@ -84,13 +88,17 @@ jobs:
       - name: Publish
         working-directory: ./backend
         run: |
-          dotnet publish TodoApp.Api.csproj --no-restore --no-build --configuration Release --output ./publish
-        
+          dotnet publish TodoApp.Api.csproj \
+            --no-restore \
+            --no-build \
+            --configuration Release \
+            --output ./publish
+
       - name: Upload dotnet artifacts
         uses: actions/upload-artifact@v7
         with:
           name: api
-          path: ./publish
+          path: ./backend/publish
 
   frontend-build-and-test:
     needs: versionamento
@@ -140,6 +148,10 @@ jobs:
     needs: versionamento
     runs-on: ubuntu-latest
     name: Security Check
+
+    permissions:
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
