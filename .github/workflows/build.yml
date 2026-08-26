@@ -133,9 +133,13 @@ jobs:
           path: ./frontend/dist/frontend/browser
 
   dependency-check:
+    if: github.event_name == 'pull_request'
     needs: versionamento
     runs-on: ubuntu-latest
     name: Dependency Check
+
+    permissions:
+      contents: read
 
     steps:
       - name: 'Checkout Repository'
