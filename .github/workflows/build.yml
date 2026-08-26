@@ -16,6 +16,9 @@ jobs:
     permissions:
       contents: write
 
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -69,14 +72,25 @@ jobs:
       - name: Tests
         working-directory: ./backend
         run: |
-          dotnet test TodoApp.Api.slnx --no-restore --no-build  --configuration Release --logger trx --results-directory "TestResults"
+          dotnet test TodoApp.Api.slnx --no-restore --no-build --configuration Release --logger trx --results-directory "TestResults"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dotnet-test-results
           path: backend/TestResults
+
+      - name: Publish
+        working-directory: ./backend
+        run: |
+          dotnet publish TodoApp.Api.csproj --no-restore --no-build --configuration Release --output ./publish
+        
+      - name: Upload dotnet artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: api
+          path: ./publish
 
   frontend-build-and-test:
     needs: versionamento
@@ -103,7 +117,13 @@ jobs:
         working-directory: ./frontend
         run: |
           npm run build
-          
+
+      - name: Upload frontend artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend
+          path: ./frontend/dist/frontend/browser
+
   dependency-check:
     needs: versionamento
     runs-on: ubuntu-latest
@@ -113,3 +133,86 @@ jobs:
 
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v5
+
+  code-security-check:
+    needs: versionamento
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - csharp
+          - javascript-typescript
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        if: matrix.language == 'csharp'
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+
+  build-backend-docker:
+    needs: [versionamento, backend-build-and-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: api
+          path: ./backend
+          run-id: ${{ github.run_id }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and Push Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            fourtwodev/todo-app-api:${{ needs.versionamento.outputs.version }}
+            fourtwodev/todo-app-api:latest
+
+  build-frontend-docker:
+    needs: [versionamento, frontend-build-and-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: frontend
+          path: ./frontend
+          run-id: ${{ github.run_id }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            fourtwodev/todo-app-frontend:${{ needs.versionamento.outputs.version }}
+            fourtwodev/todo-app-frontend:latest
