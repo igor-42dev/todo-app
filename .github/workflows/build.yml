@@ -127,6 +127,8 @@ jobs:
   dependency-check:
     needs: versionamento
     runs-on: ubuntu-latest
+    name: Dependency Check
+
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v6
@@ -137,7 +139,8 @@ jobs:
   code-security-check:
     needs: versionamento
     runs-on: ubuntu-latest
-    
+    name: Security Check
+
     strategy:
       fail-fast: false
       matrix:
@@ -164,6 +167,7 @@ jobs:
   build-backend-docker:
     needs: [versionamento, backend-build-and-test]
     runs-on: ubuntu-latest
+    name: Backend Docker
 
     steps:
       - uses: actions/checkout@v7
@@ -192,6 +196,7 @@ jobs:
   build-frontend-docker:
     needs: [versionamento, frontend-build-and-test]
     runs-on: ubuntu-latest
+    name: Frontend Docker
 
     steps:
       - uses: actions/checkout@v7
